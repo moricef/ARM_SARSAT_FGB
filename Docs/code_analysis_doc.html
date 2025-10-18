@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Code FGB Cospas-Sarsat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        h2 {
+            color: #2a5298;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #667eea;
+            margin: 20px 0 10px 0;
+            font-size: 1.4em;
+        }
+        
+        h4 {
+            color: #764ba2;
+            margin: 15px 0 8px 0;
+            font-size: 1.1em;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .danger-box {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-left: 5px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border-left: 5px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        code {
+            background: #263238;
+            color: #aed581;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+        
+        footer {
+            background: #263238;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        
+        .section-nav {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .section-nav a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        
+        .section-nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Analyse du Code FGB Cospas-Sarsat</h1>
+            <p>Revue technique complète - Odroid-C4 + PlutoSDR</p>
+        </header>
+        
+        <div class="content">
+            
+            <div class="section-nav">
+                <strong>Navigation rapide :</strong>
+                <a href="#libiio">Documentation libiio</a> |
+                <a href="#pluto">pluto_control.c</a> |
+                <a href="#t001">t001_protocol.c</a> |
+                <a href="#modulator">biphase_modulator.c</a> |
+                <a href="#problemes">Problèmes critiques</a> |
+                <a href="#tests">Tests</a>
+            </div>
+
+            <h2 id="libiio">📚 Documentation libiio - Concepts clés</h2>
+            
+            <h3>Structure hiérarchique</h3>
+            <pre>iio_context (connexion Pluto)
+    └─ iio_device (composants: ad9361-phy, cf-ad9361-dds-core-lpc)
+        └─ iio_channel (canaux I/Q, LO, etc.)
+            └─ attributes (fréquence, gain, sample rate)</pre>
+            
+            <h3>Deux devices importants</h3>
+            <ul>
+                <li><code>ad9361-phy</code> : Configuration (fréquence, gain, sample rate)</li>
+                <li><code>cf-ad9361-dds-core-lpc</code> : Transmission des données I/Q</li>
+            </ul>
+
+            <h2 id="pluto">🔍 Analyse : pluto_control.c</h2>
+            
+            <div class="success-box">
+                <h3><span class="emoji">✅</span> Points forts</h3>
+                <ol>
+                    <li><strong>Structure propre</strong> : <code>pluto_ctx</code> encapsule tout</li>
+                    <li><strong>Gestion d'erreurs</strong> : Vérifications systématiques</li>
+                    <li><strong>Helper functions</strong> : <code>get_channel()</code>, <code>set_param()</code> - bien factorisé</li>
+                    <li><strong>Cleanup correct</strong> : <code>pluto_cleanup()</code> libère tout</li>
+                </ol>
+            </div>
+
+            <div class="warning-box">
+                <h3><span class="emoji">⚠️</span> Points à vérifier/corriger</h3>
+                
+                <h4>1. Sample rate minimum Pluto</h4>
+                <pre>// Ligne ~136
+if (!set_param(tx_chan, "sampling_frequency", sample_rate)) {</pre>
+                <p><strong>Problème :</strong> Le Pluto a un minimum de <strong>520 kHz</strong> (pas 6.4 kHz)</p>
+                <p><strong>Solution :</strong> Ajouter une vérification</p>
+                <pre>if (sample_rate < 520000) {
+    fprintf(stderr, "Sample rate too low (min 520 kHz)\n");
+    return false;
+}</pre>
+
+                <h4>2. Gain TX - attention au signe</h4>
+                <pre>// Ligne ~147
+int hw_gain = -tx_gain_db * 1000;  // Convert to millidB</pre>
+                <p><strong>Vérifier :</strong> Sur le Pluto, <code>hardwaregain</code> pour TX est une <strong>atténuation</strong></p>
+                <ul>
+                    <li>Valeur typique : <code>-89000</code> à <code>0</code> (millidB)</li>
+                    <li><code>0</code> = puissance max</li>
+                    <li><code>-89000</code> = puissance min</li>
+                </ul>
+                <p>Votre code semble correct, mais vérifiez l'appel :</p>
+                <pre>pluto_configure_tx(pluto, freq, rate, -10);  // -10 dB d'atténuation</pre>
+
+                <h4>3. Buffer lifecycle</h4>
+                <pre>// Ligne ~165
+pluto->txbuf = iio_device_create_buffer(pluto->tx_dev, num_samples, false);</pre>
+                <p><strong>Attention :</strong> Vous créez/détruisez le buffer à chaque transmission.</p>
+                <p><strong>Optimisation possible</strong> (si transmissions répétées) : créer le buffer une fois dans <code>pluto_init()</code></p>
+                <p>Mais pour des transmissions sporadiques (balises), votre approche est OK.</p>
+
+                <h4>4. Format I/Q</h4>
+                <pre>// Ligne ~174-176
+buf[2*i]     = samples[i].i;  // I sample
+buf[2*i + 1] = samples[i].q;  // Q sample</pre>
+                <p><strong>Vérifier :</strong> Le Pluto attend des <code>int16_t</code> en complément à 2</p>
+                <ul>
+                    <li>Plage : <code>-2048</code> à <code>+2047</code> (12-bit signé)</li>
+                    <li>Si vos samples sont 0-4095 (12-bit unsigned), il faut convertir :</li>
+                </ul>
+                <pre>// Si vos samples sont 0-4095 (12-bit unsigned)
+int16_t convert_to_signed(uint16_t val) {
+    return (int16_t)(val - 2048);
+}</pre>
+            </div>
+
+            <div class="info-box">
+                <h3><span class="emoji">❓</span> Questions manquantes</h3>
+                <ol>
+                    <li><strong>Où est <code>generate_t001_waveform()</code> ?</strong> Cette fonction n'est pas dans ce fichier. C'est votre code de génération FGB ?</li>
+                    <li><strong>Définition de <code>iq_sample_t</code> ?</strong> Probablement dans <code>pluto_control.h</code></li>
+                    <li><strong>Valeur de <code>PLUTO_SAMPLE_RATE</code> ?</strong> C'est défini à combien ? 6.4 kHz (trop bas) ou 512 kHz+ ?</li>
+                </ol>
+            </div>
+
+            <h2 id="t001">🔍 Analyse : t001_protocol.c</h2>
+            
+            <div class="success-box">
+                <h3><span class="emoji">✅</span> Points forts</h3>
+                <ol>
+                    <li><strong>BCH conforme T.001</strong> : Implémentation correcte des codes correcteurs</li>
+                    <li><strong>Encodage GPS sophistiqué</strong> : 3 résolutions (30min, 4sec, offset)</li>
+                    <li><strong>Structure de trame complète</strong> : 144 bits selon spec</li>
+                </ol>
+            </div>
+
+            <div class="warning-box">
+                <h3><span class="emoji">⚠️</span> Points à vérifier</h3>
+                
+                <h4>1. Numérotation des bits (CS vs array index)</h4>
+                <pre>#define CS_BIT(cs_bit) ((cs_bit) - 1)  // Doit être dans le .h</pre>
+                <p>Vous utilisez la notation Cospas-Sarsat (bits 1-144) et convertissez en index array (0-143). <strong>C'est correct</strong> si <code>CS_BIT</code> est bien défini.</p>
+
+                <h4>2. Encodage GPS - Sign extension</h4>
+                <pre>// Ligne 67-68
+if (lat_ref_raw & 0x100) lat_ref_signed |= 0xFE00;
+if (lon_ref_raw & 0x200) lon_ref_signed |= 0xFC00;</pre>
+                <p><strong>Correct :</strong> Extension de signe pour complément à 2.</p>
+
+                <h4>3. Calcul offset 4sec</h4>
+                <p>Le calcul est complexe mais semble conforme à la spec. <strong>À valider</strong> avec des positions GPS connues et résultats attendus.</p>
+            </div>
+
+            <h2 id="modulator">🔍 Analyse : biphase_modulator.c</h2>
+            
+            <div class="danger-box">
+                <h3><span class="emoji">⚠️⚠️⚠️</span> PROBLÈMES CRITIQUES TROUVÉS</h3>
+                
+                <h4>1. Sample rate incohérent</h4>
+                <pre>// Dans le .h (probablement) :
+#define SAMPLES_PER_BIT 16         // 400 bps × 16 = 6400 Hz
+#define INTERPOLATION_FACTOR ???   // Combien ?
+#define PLUTO_SAMPLE_RATE ???      // Devrait être ≥ 520 kHz</pre>
+
+                <p><strong>Le problème :</strong></p>
+                <ul>
+                    <li>Vous générez en baseband à <strong>6400 Hz</strong> (16 samples/bit × 400 bps)</li>
+                    <li>Vous interpolez par <code>INTERPOLATION_FACTOR</code></li>
+                    <li>Le Pluto veut <strong>minimum 520 kHz</strong></li>
+                </ul>
+
+                <p><strong>Calcul nécessaire :</strong></p>
+                <pre>6400 Hz × INTERPOLATION_FACTOR ≥ 520000 Hz
+INTERPOLATION_FACTOR ≥ 81.25</pre>
+
+                <p><strong>Votre interpolation actuelle = "hold" (répétition)</strong></p>
+                <ul>
+                    <li>Très simple mais crée des paliers</li>
+                    <li>Fonctionne mais spectre imparfait</li>
+                    <li>Pour du proto : <strong>acceptable</strong></li>
+                    <li>Pour de la prod : <strong>à améliorer avec FIR</strong></li>
+                </ul>
+            </div>
+
+            <div class="success-box">
+                <h4>2. Phase BPSK : ±1.1 rad <span class="emoji">✅</span></h4>
+                <pre>#define PHASE_SHIFT_RAD 1.1  // ±1.1 rad phase deviation</pre>
+                <p><strong>Excellent !</strong> Vous respectez la spec T.001 qui demande ±1.1 rad (pas ±π comme BPSK classique).</p>
+            </div>
+
+            <div class="success-box">
+                <h4>3. Manchester encoding <span class="emoji">✅</span></h4>
+                <pre>// bit 0: low→high transition (0 first half, 1 second half)
+// bit 1: high→low transition (1 first half, 0 second half)</pre>
+                <p><strong>Conforme</strong> à biphase-L.</p>
+            </div>
+
+            <div class="success-box">
+                <h4>4. Carrier unmodulated (160 ms) <span class="emoji">✅</span></h4>
+                <pre>// 1. Unmodulated carrier (160 ms): I=A, Q=0
+for (size_t i = 0; i < carrier_samples; i++) {
+    (*waveform)[wf_idx].i = IQ_AMPLITUDE;
+    (*waveform)[wf_idx].q = 0;
+    wf_idx++;
+}</pre>
+                <p><strong>Conforme T.001</strong> : carrier avant le message.</p>
+            </div>
+
+            <h2 id="problemes">⚠️ PROBLÈMES MAJEURS À CORRIGER</h2>
+            
+            <div class="danger-box">
+                <h3>1. Sample rate cohérence</h3>
+                <p><strong>Vérifiez dans vos .h :</strong></p>
+                <pre>// Devrait être :
+#define SAMPLES_PER_BIT 16             // Baseband: 6.4 kHz
+#define INTERPOLATION_FACTOR 100       // 6.4k × 100 = 640 kHz
+#define PLUTO_SAMPLE_RATE 640000       // 640 kHz (>520k min)</pre>
+
+                <p><strong>OU alternative plus propre :</strong></p>
+                <pre>#define PLUTO_SAMPLE_RATE 1000000      // 1 MHz
+#define SAMPLES_PER_BIT 16
+#define INTERPOLATION_FACTOR 156       // 6.4k × 156 ≈ 1 MHz</pre>
+            </div>
+
+            <div class="warning-box">
+                <h3>2. Durées de message</h3>
+                <pre>#define CARRIER_DURATION_MS 160
+#define MESSAGE_DURATION_MS ???  // Devrait être calculé</pre>
+
+                <p><strong>Calcul MESSAGE_DURATION_MS :</strong></p>
+                <pre>144 bits × 16 samples/bit × INTERPOLATION_FACTOR / PLUTO_SAMPLE_RATE × 1000
+
+Si PLUTO_SAMPLE_RATE = 1 MHz et INTERPOLATION = 156 :
+144 × 16 × 156 / 1000000 × 1000 = 359 ms</pre>
+
+                <p><strong>Votre code ligne 100 fait :</strong></p>
+                <pre>size_t message_samples = (MESSAGE_DURATION_MS * PLUTO_SAMPLE_RATE) / 1000;</pre>
+                <p>Vous pré-allouez selon une durée fixe. <strong>Risque :</strong> si <code>MESSAGE_DURATION_MS</code> est mal calculé, vous tronquez ou débordez.</p>
+
+                <p><strong>Solution :</strong></p>
+                <pre>// Calculer dynamiquement au lieu de pré-allouer
+size_t message_samples = iq_data_samples;  // Taille réelle après modulation</pre>
+            </div>
+
+            <h2 id="tests">🧪 Tests à faire (sans Pluto)</h2>
+            
+            <h3>Test 1 : Génération de trame</h3>
+            <pre>beacon_config_t config = {
+    .beacon_id = 0x1234567,
+    .latitude = 48.8566,   // Paris
+    .longitude = 2.3522,
+    .altitude = 100.0,
+    .mode = BEACON_MODE_NORMAL
+};
+
+uint8_t frame[144];
+build_t001_frame(frame, &config);
+print_frame_analysis(frame);</pre>
+            <p><strong>Attendu :</strong> Frame valid, BCH correct</p>
+
+            <h3>Test 2 : Génération I/Q</h3>
+            <pre>iq_sample_t *waveform;
+size_t length;
+generate_t001_waveform(frame, &waveform, &length);
+
+printf("Waveform: %zu samples (%.1f ms)\n", 
+       length, (length * 1000.0) / PLUTO_SAMPLE_RATE);
+
+// Sauvegarder en fichier
+FILE *f = fopen("test.iq", "wb");
+fwrite(waveform, sizeof(iq_sample_t), length, f);
+fclose(f);</pre>
+
+            <p><strong>Vérifier avec GNU Radio :</strong></p>
+            <pre>File Source (int16) → Complex to Float → QT GUI Time Sink</pre>
+
+            <h2>✅ Checklist avant test Pluto</h2>
+            
+            <table>
+                <tr>
+                    <th>Tâche</th>
+                    <th>Statut</th>
+                </tr>
+                <tr>
+                    <td>Définir <code>INTERPOLATION_FACTOR</code> cohérent (≥81)</td>
+                    <td>❌ À faire</td>
+                </tr>
+                <tr>
+                    <td>Définir <code>PLUTO_SAMPLE_RATE</code> ≥ 520 kHz</td>
+                    <td>❌ À faire</td>
+                </tr>
+                <tr>
+                    <td>Vérifier <code>MESSAGE_DURATION_MS</code> ou calculer dynamiquement</td>
+                    <td>❌ À faire</td>
+                </tr>
+                <tr>
+                    <td>Tester génération de trame (BCH valid)</td>
+                    <td>⏳ En attente</td>
+                </tr>
+                <tr>
+                    <td>Tester génération I/Q (fichier .iq visualisable)</td>
+                    <td>⏳ En attente</td>
+                </tr>
+                <tr>
+                    <td>Compiler sans warnings</td>
+                    <td>⏳ En attente</td>
+                </tr>
+            </table>
+
+            <h2>📄 Fichiers .h manquants</h2>
+            
+            <div class="info-box">
+                <p><strong>Vous devez avoir :</strong></p>
+                <ol>
+                    <li><strong>pluto_control.h</strong> - avec <code>typedef iq_sample_t</code>, prototypes</li>
+                    <li><strong>t001_protocol.h</strong> - avec toutes les <code>#define</code>, <code>beacon_config_t</code></li>
+                    <li><strong>biphase_modulator.h</strong> - avec les constantes sample rate</li>
+                </ol>
+                <p><strong>Vous pouvez les montrer pour vérification finale</strong></p>
+            </div>
+
+            <h2>📋 Checklist de test (quand Pluto arrive)</h2>
+            
+            <h3>1. Test de connexion</h3>
+            <pre>pluto_ctx_t *pluto = pluto_init(NULL);
+if (pluto_is_connected(pluto)) {
+    printf("Pluto OK\n");
+}</pre>
+
+            <h3>2. Test de configuration</h3>
+            <pre>bool ok = pluto_configure_tx(pluto, 406050000, 1000000, -10);
+// Fréquence: 406.05 MHz
+// Sample rate: 1 MHz
+// Atténuation: -10 dB</pre>
+
+            <h3>3. Test transmission simple</h3>
+            <pre>iq_sample_t test[100];
+// Remplir avec un sinus simple
+pluto_transmit_iq(pluto, test, 100);</pre>
+
+        </div>
+        
+        <footer>
+            <p>Analyse technique du code FGB Cospas-Sarsat pour Odroid-C4 + PlutoSDR</p>
+            <p>ADRASEC/FNRASEC - Balise de test T.001</p>
+        </footer>
+    </div>
+</body>
+</html>

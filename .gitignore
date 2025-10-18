@@ -1,0 +1,29 @@
+# Build artifacts
+build/
+bin/
+*.o
+*.a
+*.so
+
+# Executable
+sarsat_t001
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug files
+*.log
+core
+vgcore.*
+
+# Temporary files
+*.tmp
+*.bak

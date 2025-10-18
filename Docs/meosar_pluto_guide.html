@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réception MEOSAR Cospas-Sarsat avec Adalm Pluto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        h2 {
+            color: #2a5298;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #667eea;
+            margin: 20px 0 10px 0;
+            font-size: 1.3em;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            border-left: 5px solid #00acc1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 5px solid #ff9800;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .freq-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .freq-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .freq-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .freq-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .freq-table tr:hover {
+            background: #e3f2fd;
+            transition: background 0.3s ease;
+        }
+        
+        ul {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #ffd54f 0%, #ffeb3b 100%);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        code {
+            background: #263238;
+            color: #aed581;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        
+        .setup-diagram {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.95em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .arrow {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        footer {
+            background: #263238;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛰️ Réception MEOSAR Cospas-Sarsat</h1>
+            <p>Guide pratique avec Adalm Pluto SDR</p>
+        </header>
+        
+        <div class="content">
+            <h2>Vue d'ensemble du système</h2>
+            <p>Le système <strong>MEOSAR</strong> (Medium Earth Orbit Search and Rescue) fait partie du réseau international <strong>Cospas-Sarsat</strong> de recherche et sauvetage par satellite. Il utilise des constellations MEO comme Galileo, GLONASS-K et GPS-III pour relayer les signaux de détresse des balises 406 MHz.</p>
+            
+            <div class="info-box">
+                <strong>🎯 Objectif du projet :</strong> Recevoir et décoder les signaux MEOSAR relayés depuis les satellites MEO vers les stations au sol, en utilisant le <span class="highlight">downlink 1544-1545 MHz</span>.
+            </div>
+            
+            <h2>Fréquences Cospas-Sarsat</h2>
+            <table class="freq-table">
+                <tr>
+                    <th>Liaison</th>
+                    <th>Fréquence</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><strong>Uplink</strong></td>
+                    <td><code>406,0 - 406,1 MHz</code></td>
+                    <td>Balises de détresse → Satellites</td>
+                </tr>
+                <tr>
+                    <td><strong>Downlink MEOSAR/GEOSAR</strong></td>
+                    <td><code>1544 - 1545 MHz</code></td>
+                    <td>Satellites → Stations LUT (bande L)</td>
+                </tr>
+                <tr>
+                    <td><strong>Downlink GPS-DASS</strong></td>
+                    <td><code>2226 MHz</code></td>
+                    <td>GPS expérimental (bande S)</td>
+                </tr>
+                <tr>
+                    <td><strong>Return Link (RLS)</strong></td>
+                    <td><code>1645,5 MHz</code></td>
+                    <td>Confirmation vers balises SGB</td>
+                </tr>
+            </table>
+            
+            <h2>Constellations MEOSAR</h2>
+            <h3>🌍 Satellites actifs</h3>
+            <ul>
+                <li><strong>Galileo SAR</strong> - Altitude ~23 000 km, orbite MEO</li>
+                <li><strong>GLONASS-K SAR</strong> - Constellation russe</li>
+                <li><strong>GPS-III</strong> - Certains satellites avec payload SAR</li>
+            </ul>
+            
+            <div class="info-box">
+                <strong>⚡ Avantage MEOSAR :</strong> Localisation quasi-instantanée grâce à la visibilité simultanée de plusieurs satellites (contrairement aux systèmes LEO qui nécessitent 90+ minutes d'attente).
+            </div>
+            
+            <h2>Configuration matérielle</h2>
+            
+            <div class="setup-diagram">
+                <div>Antenne L-band (1544 MHz)</div>
+                <div class="arrow">▼</div>
+                <div>LNA (Low Noise Amplifier)</div>
+                <div class="arrow">▼</div>
+                <div>Filtre passe-bande (optionnel)</div>
+                <div class="arrow">▼</div>
+                <div>Adalm Pluto SDR</div>
+                <div class="arrow">▼</div>
+                <div>PC / GNU Radio / SDR++</div>
+            </div>
+            
+            <h3>🔧 Composants nécessaires</h3>
+            
+            <h4>1. Antenne</h4>
+            <ul>
+                <li><strong>QFH (Quadrifilar Helix)</strong> - Polarisation circulaire, gain ~3-5 dBi</li>
+                <li><strong>Hélice simple</strong> - Plus directive, meilleur gain</li>
+                <li><strong>Patch array</strong> - Compact, gain modéré</li>
+                <li><strong>Dimensions approximatives :</strong> λ/4 ≈ 5 cm à 1544 MHz</li>
+            </ul>
+            
+            <h4>2. LNA (Amplificateur faible bruit)</h4>
+            <div class="warning-box">
+                <strong>⚠️ CRITIQUE pour MEOSAR :</strong> Les signaux MEO sont très faibles en raison de la distance (~23 000 km). Un LNA de qualité est indispensable.
+            </div>
+            
+            <p><strong>Spécifications recommandées :</strong></p>
+            <ul>
+                <li><strong>Gain :</strong> 20-30 dB minimum</li>
+                <li><strong>Figure de bruit (NF) :</strong> &lt; 1 dB idéalement (0,5-0,8 dB optimal)</li>
+                <li><strong>Bande passante :</strong> Couvrant 1544-1545 MHz</li>
+            </ul>
+            
+            <p><strong>LNA recommandés :</strong></p>
+            <ul>
+                <li><code>Nooelec SAWbird+ GPS</code> - Filtre SAW intégré, optimisé L-band</li>
+                <li><code>SPF5189Z</code> - Circuit intégré, NF ~0,6 dB, gain 20 dB</li>
+                <li><code>LNA L-band commercial</code> - Modules chinois économiques</li>
+            </ul>
+            
+            <h4>3. Adalm Pluto SDR</h4>
+            <ul>
+                <li><strong>Plage de fréquence :</strong> 325 MHz - 3,8 GHz ✅</li>
+                <li><strong>Bande passante :</strong> Jusqu'à 20 MHz (largement suffisant)</li>
+                <li><strong>Taux d'échantillonnage :</strong> Réglable selon le besoin</li>
+                <li><strong>Alimentation LNA :</strong> Bias-tee disponible sur le Pluto</li>
+            </ul>
+            
+            <h2>Configuration logicielle</h2>
+            
+            <h3>📡 Réception du signal</h3>
+            <p><strong>Logiciels compatibles :</strong></p>
+            <ul>
+                <li><strong>GNU Radio</strong> - Traitement avancé, flowgraphs personnalisables</li>
+                <li><strong>SDR++</strong> - Interface moderne, facile d'utilisation</li>
+                <li><strong>SDR#</strong> - Windows, simple pour débuter</li>
+            </ul>
+            
+            <h3>⚙️ Paramètres de réception</h3>
+            <ul>
+                <li><strong>Fréquence centrale :</strong> <code>1544,5 MHz</code></li>
+                <li><strong>Bande passante :</strong> 200-500 kHz</li>
+                <li><strong>Gain RF :</strong> À ajuster selon signal (attention saturation)</li>
+                <li><strong>Mode :</strong> FM ou données brutes IQ</li>
+            </ul>
+            
+            <h3>🔍 Décodage MEOSAR</h3>
+            <div class="warning-box">
+                <strong>⚠️ Défi technique :</strong> Le décodage MEOSAR nécessite des algorithmes avancés de traitement du signal (TDOA/FDOA) car la localisation repose sur plusieurs satellites simultanément.
+            </div>
+            
+            <p><strong>Éléments à décoder :</strong></p>
+            <ul>
+                <li>Trame de la balise 406 MHz relayée</li>
+                <li>ID unique de la balise (15 ou 22 bits hexadécimaux)</li>
+                <li>Type de balise (EPIRB, ELT, PLB)</li>
+                <li>Position encodée (si GPS intégré)</li>
+            </ul>
+            
+            <h2>Avantages du système SGB</h2>
+            <p>Les <strong>Second Generation Beacons (SGB)</strong> apportent des améliorations majeures :</p>
+            <ul>
+                <li><strong>Return Link Service (RLS) :</strong> Confirmation d'acquisition envoyée à la balise</li>
+                <li><strong>Localisation quasi-instantanée</strong> via MEOSAR</li>
+                <li><strong>Précision améliorée</strong> grâce au traitement multi-satellites</li>
+                <li><strong>Meilleure intégrité du signal</strong></li>
+            </ul>
+            
+            <h2>Défis et solutions</h2>
+            
+            <table class="freq-table">
+                <tr>
+                    <th>Défi</th>
+                    <th>Solution</th>
+                </tr>
+                <tr>
+                    <td>Signal très faible depuis MEO</td>
+                    <td>LNA haute performance (gain 25+ dB, NF &lt;1 dB)</td>
+                </tr>
+                <tr>
+                    <td>Interférences L-band</td>
+                    <td>Filtre passe-bande ou filtre SAW</td>
+                </tr>
+                <tr>
+                    <td>Décodage complexe TDOA/FDOA</td>
+                    <td>Développement GNU Radio ou outils spécialisés</td>
+                </tr>
+                <tr>
+                    <td>Multiples satellites simultanés</td>
+                    <td>Logiciel de tracking et corrélation temporelle</td>
+                </tr>
+            </table>
+            
+            <h2>Ressources et références</h2>
+            <ul>
+                <li><strong>Site officiel :</strong> <a href="https://www.cospas-sarsat.int" target="_blank">cospas-sarsat.int</a></li>
+                <li><strong>Documentation Pluto :</strong> <a href="https://wiki.analog.com/university/tools/pluto" target="_blank">Analog Devices Wiki</a></li>
+                <li><strong>GNU Radio :</strong> <a href="https://www.gnuradio.org" target="_blank">gnuradio.org</a></li>
+                <li><strong>Communauté radioamateur :</strong> Forums SDR et satellites</li>
+            </ul>
+            
+            <div class="info-box">
+                <strong>📚 Conseil :</strong> Commencez par simplement recevoir et visualiser le signal avant de vous attaquer au décodage. Le spectre à 1544 MHz devrait montrer des burst caractéristiques lors du passage des balises.
+            </div>
+        </div>
+        
+        <footer>
+            <p>Guide créé pour la réception MEOSAR Cospas-Sarsat avec Adalm Pluto SDR</p>
+            <p>Système de sauvetage international - Plus de 50 000 vies sauvées depuis 1982</p>
+        </footer>
+    </div>
+</body>
+</html>

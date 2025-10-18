@@ -1,0 +1,11 @@
+# Simple Makefile for GPIO test
+CC = gcc
+CFLAGS = -Wall -O2
+
+test_gpio: test_gpio.c
+	$(CC) $(CFLAGS) test_gpio.c -o test_gpio
+
+clean:
+	rm -f test_gpio
+
+.PHONY: clean
