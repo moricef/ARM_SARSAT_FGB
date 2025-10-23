@@ -135,20 +135,20 @@ int main(int argc, char *argv[]) {
 
     print_config(&config);
 
-    // Initialize GPIO
-    if (!gpio_init()) {
-        fprintf(stderr, "GPIO initialization failed\n");
-        return 1;
-    }
+    // Initialize GPIO (DISABLED - permission issues)
+    // if (!gpio_init()) {
+    //     fprintf(stderr, "GPIO initialization failed\n");
+    //     return 1;
+    // }
 
-    // Turn on status LED
-    gpio_status_led(true);
+    // Turn on status LED (DISABLED)
+    // gpio_status_led(true);
 
     // Initialize PlutoSDR
     pluto = pluto_init(PLUTO_URI);
     if (!pluto) {
         fprintf(stderr, "PlutoSDR initialization failed\n");
-        gpio_cleanup();
+        // gpio_cleanup();
         return 1;
     }
 
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
     if (!validate_t001_frame(frame)) {
         fprintf(stderr, "ERROR: Frame validation failed!\n");
         pluto_cleanup(pluto);
-        gpio_cleanup();
+        // gpio_cleanup();
         return 1;
     }
 
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
     if (!pluto_configure_tx(pluto, config.frequency, PLUTO_SAMPLE_RATE, config.tx_gain_db)) {
         fprintf(stderr, "TX configuration failed\n");
         pluto_cleanup(pluto);
-        gpio_cleanup();
+        // gpio_cleanup();
         return 1;
     }
 
@@ -191,21 +191,21 @@ int main(int argc, char *argv[]) {
     while (running) {
         printf("\n--- Transmission #%d ---\n", ++tx_count);
 
-        // Prepare for TX (PA, relay, LEDs)
-        if (!gpio_prepare_tx()) {
-            fprintf(stderr, "Failed to prepare TX\n");
-            break;
-        }
+        // Prepare for TX (PA, relay, LEDs) - DISABLED
+        // if (!gpio_prepare_tx()) {
+        //     fprintf(stderr, "Failed to prepare TX\n");
+        //     break;
+        // }
 
         // Transmit T.001 frame (TX already configured)
         if (!pluto_transmit_t001_frame_simple(pluto, frame)) {
             fprintf(stderr, "Transmission failed\n");
-            gpio_end_tx();
+            // gpio_end_tx();
             break;
         }
 
-        // Return to RX mode
-        gpio_end_tx();
+        // Return to RX mode - DISABLED
+        // gpio_end_tx();
 
         // Wait for next transmission
         printf("Waiting %d seconds for next TX...\n", config.tx_interval_sec);
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
     // Cleanup
     printf("\nShutting down...\n");
     pluto_cleanup(pluto);
-    gpio_cleanup();
+    // gpio_cleanup();
 
     printf("Shutdown complete\n");
     return 0;
