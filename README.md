@@ -181,16 +181,6 @@ ls /sys/class/gpio/
 
 ## 📝 TODO
 
-- [ ] Intégration GPS NMEA temps réel (UART)
-- [ ] Interface web de configuration
-- [ ] Support T.018 (2ème génération OQPSK)
-- [ ] Récepteur 406 MHz (décodeur)
-- [ ] Downlink 1544 MHz
-
 ## 🤝 Contribution
 
-Projet développé pour la formation ADRASEC.
-
 ## 📄 Licence
-
-Usage interne formation uniquement. Respecter la réglementation radio.
